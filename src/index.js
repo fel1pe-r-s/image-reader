@@ -4,7 +4,7 @@ import { configMulter } from "./lib/multer.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import "dotenv/config.js";
-import { controllerUpload } from "./controllerUpload.js";
+import { controllerUpload } from "./controller/controllerUpload.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

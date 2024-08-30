@@ -1,4 +1,4 @@
-import { pool } from "./database.js";
+import { pool } from "../database.js";
 
 const createMeasureTable = async () => {
   const client = await pool.connect();

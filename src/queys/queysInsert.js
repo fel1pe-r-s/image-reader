@@ -1,4 +1,4 @@
-import { pool } from "../database.js";
+import { pool } from "../database/database.js";
 
 export async function insertData({
   measure_uuid,

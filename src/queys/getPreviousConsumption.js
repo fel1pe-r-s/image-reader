@@ -1,4 +1,4 @@
-import { pool } from "../database.js";
+import { pool } from "../database/database.js";
 
 export async function getPreviousConsumption(customerCode, measureType) {
   const client = await pool.connect();
@@ -10,6 +10,10 @@ export async function getPreviousConsumption(customerCode, measureType) {
              LIMIT 1`,
       [customerCode, measureType]
     );
+    if (result.rows.length === 0) {
+      console.log("No previous consumption found");
+      return null;
+    }
     return result.rows[0] || null;
   } catch (err) {
     console.error("Error fetching previous consumption:", err);

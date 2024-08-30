@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --watch src/index.js",
     "dev": "tsx src/server.ts --watch",
-    "db:create": "node src/createTable.js",
+    "db:create": "node src/database/createTable.js",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",

@@ -12,13 +12,13 @@ export async function filesCreateImage(nameImage) {
     `${path.resolve(__dirname, "..", "..", "tmp", "uploads")}/${nameImage}`,
     {
       mimeType: "image/png",
-      displayName: "Jetpack drawing",
+      displayName: nameImage,
     }
   );
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const result = await model.generateContent([
-    "What is written in this image.",
+    "Extract the current meter reading and label it as measure_consumption.",
     {
       fileData: {
         fileUri: uploadResult.file.uri,

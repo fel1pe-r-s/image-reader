@@ -1,7 +1,7 @@
-import { filesCreateImage } from "./lib/gemini.js";
-import { checkIfReadingExists } from "./queys/checkIfReadingExists.js";
-import { getPreviousConsumption } from "./queys/getPreviousConsumption.js";
-import { insertData } from "./queys/queysInsert.js";
+import { filesCreateImage } from "../lib/gemini.js";
+import { checkIfReadingExists } from "../queys/checkIfReadingExists.js";
+import { getPreviousConsumption } from "../queys/getPreviousConsumption.js";
+import { insertData } from "../queys/queysInsert.js";
 
 export async function controllerUpload(req, res) {
   const file = req.file;
@@ -25,17 +25,31 @@ export async function controllerUpload(req, res) {
     });
   }
 
-  const { measure_consumption } = await getPreviousConsumption(
-    customer_code,
-    measure_type
-  );
-  const previousReading = Number(measure_consumption);
+  const result = await getPreviousConsumption(customer_code, measure_type);
+  const measure_consumption = result?.measure_consumption || 0;
+  const previousReading = measure_consumption;
+  const { text } = await filesCreateImage(file.key);
+  console.log(text);
+  function extractEConverterValor(jsonString) {
+    const regex = /"measure_consumption":\s*"(\d+)"/;
+    const regex2 = /measure_consumption:\s*(\d+)/;
 
-  /*  const { textImage } = await filesCreateImage(file.key); */
+    let match = jsonString.match(regex);
 
-  //RegExp
-  //console.log(textImage);
-  const ReadingCurrent = 20.0;
+    if (match) {
+      return Number(match[1]);
+    }
+    match = jsonString.match(regex2);
+    if (match) {
+      return Number(match[1]);
+    } else {
+      return new Error("Error: variable measure_consumption not found.");
+    }
+  }
+
+  const consumption = extractEConverterValor(text);
+
+  const ReadingCurrent = consumption;
 
   function calculateWaterGasAccount(
     ReadingCurrent,
@@ -54,18 +68,17 @@ export async function controllerUpload(req, res) {
 
     const consumption = ReadingCurrent - previousReading;
 
-    const measure_value = consumption * ratePerUnit;
+    const measure_value = Math.round(consumption * ratePerUnit);
 
-    return {
-      measure_value,
-    };
+    return measure_value;
   }
 
-  const { measure_value } = calculateWaterGasAccount(
+  const measure_value = calculateWaterGasAccount(
     ReadingCurrent,
     previousReading,
     measure_type
   );
+
   const image_name = file.key;
   const measure_uuid = crypto.randomUUID();
   const app_url = process.env.APP_URL || "http://localhost";
@@ -86,5 +99,7 @@ export async function controllerUpload(req, res) {
     image_url,
     measure_value,
     measure_uuid,
+    ReadingCurrent,
+    text,
   });
 }
